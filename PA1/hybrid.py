@@ -23,22 +23,27 @@ def cross_correlation_2d(img, kernel):
     kernel_height, kernel_width = kernel.shape
     pad_h, pad_w = kernel_height // 2, kernel_width // 2
 
+    # grayscale images
     if img.ndim == 2:
         h, w = img.shape
         padded_img = np.pad(img, ((pad_h, pad_h), (pad_w, pad_w)), mode='constant', constant_values=0)
         output = np.zeros((h, w))
 
+        # apply kernel over image
         for i in range(h):
             for j in range(w):
                 region = padded_img[i: i + kernel_height, j:j + kernel_width]
                 output[i, j] = np.sum(region * kernel)
         return output 
+    # rgb images
     elif img.ndim == 3:
         h, w, channels = img.shape
         output = np.zeros((h, w, channels))
 
         for c in range(channels):
-            padded_channel = np.pad(img[:, :, c], ((pad_h, pad_h), (pad_w, pad_w)), mode='constant', constant_values=0)
+            # get zero-padded image of current color channel
+            padded_img = np.pad(img[:, :, c], ((pad_h, pad_h), (pad_w, pad_w)), mode='constant', constant_values=0)
+            # apply kernel over image for channel
             for i in range(h):
                 for j in range(w):
                     region = padded_img[i: i + kernel_height, j:j + kernel_width]
@@ -98,8 +103,10 @@ def gaussian_blur_kernel_2d(sigma, height, width):
     x, y = np.meshgrid(x, y)
     # raise Exception("TODO in hybrid.py not implemented")
 
+    # calculate kernel with gaussian
     kernel = np.exp(-(x**2 + y**2) / (2 * sigma ** 2))
 
+    # normalize
     kernel /= np.sum(kernel)
 
     return kernel
